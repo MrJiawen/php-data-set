@@ -4,6 +4,9 @@ namespace Jw\DataSet\Command;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\MySqlConnection;
+use Illuminate\Support\Collection;
+use Jw\Support\Tool\FileTool;
+use Symfony\Component\Yaml\Yaml;
 
 class DataSetInputCommand extends Command
 {
@@ -55,16 +58,21 @@ class DataSetInputCommand extends Command
     protected $oneHandel = [
         'tableName' => null,
         'primaryKey' => null,
-        'primaryValue' => []
+        'primaryValue' => [],
+        'append' => null,
     ];
 
-
+    /**
+     * DataSetInputCommand constructor.
+     */
     public function __construct()
     {
         parent::__construct();
     }
 
-
+    /**
+     * @Author jiaWen.chen
+     */
     public function handle()
     {
         // 1. 初始化选项
@@ -74,7 +82,8 @@ class DataSetInputCommand extends Command
             $this->oneHandel = [
                 'tableName' => $item,
                 'primaryKey' => null,
-                'primaryValue' => $this->options['id']
+                'primaryValue' => $this->options['id'],
+                'append' => $this->options['append'],
             ];
             // 3. 检查对应的参数
             $this->checkOneHandel();
@@ -144,7 +153,6 @@ class DataSetInputCommand extends Command
                     $this->error("id输入有异常,不能逆序，只能正序；也许id是uuid，但它是不能使用区间的，程序停止运行");
                     exit();
                 }
-
                 for ($i = $between[0]; $i <= $between[1]; $i++) {
                     $response[] = $i;
                 }
@@ -161,27 +169,37 @@ class DataSetInputCommand extends Command
      */
     public function generateOne()
     {
+        //1. 获取数据库内容
         $models = $this->connection->table($this->oneHandel['tableName'])
             ->whereIn($this->oneHandel['primaryKey'], $this->oneHandel['primaryValue'])->get()->toArray();
-        $fileName = $this->options['input_path'] . '/' . $this->oneHandel['tableName'] . '.yml';
 
-        dd(123);
-//        $fileName = base_path($fileName);
-//        $ymlData = json_decode(json_encode([($this->oneHandel['tableName']) => $models]), true);
-//
-//        $fileName = $this->options['input_path'] . '/' . $this->oneHandel['tableName'] . '.yml';
-//        $fileName = base_path($fileName);
-//        $ymlData = Yaml::dump($ymlData,3);
-//
-//        if ($this->options['append']) {
-//            file_put_contents($fileName,$ymlData,FILE_APPEND);
-//            $this->info('yml 数据集合生成成功(追加)，表名为'. $this->oneHandel['tableName']);
-//        } else {
-//            file_put_contents($fileName,$ymlData,FILE_APPEND);
-//            $this->info('yml 数据集合生成成功(覆盖)，表名为'. $this->oneHandel['tableName']);
-//        }
+        $fileName = base_path($this->options['input_path']) . '/' . $this->oneHandel['tableName'] . '.yml';
+
+        // 2. 如果没有这个文件，则追加写自动改为覆盖写
+        if (!FileTool::exists($fileName)) {
+            $this->oneHandel['append'] = false;
+        }
+
+        // 3. 判断是否为追加写
+        if ($this->oneHandel['append']) {
+            $ymlData = Yaml::parseFile($fileName);
+            $ymlData[$this->oneHandel['tableName']] = array_merge(
+                json_decode(json_encode($models), true),
+                $ymlData[$this->oneHandel['tableName']]
+            );
+            // 进行去重
+            $ymlData[$this->oneHandel['tableName']] = (new Collection($ymlData[$this->oneHandel['tableName']]))->unique('id')->toArray();
+
+            $ymlData = Yaml::dump($ymlData, 3, 2);
+            FileTool::put($fileName, $ymlData);
+            $this->info('yml 数据集合生成成功(追加)，表名为' . $this->oneHandel['tableName']);
+        } else {
+            $ymlData = json_decode(json_encode([$this->oneHandel['tableName'] => $models]), true);
+            $ymlData = Yaml::dump($ymlData, 3, 2);
+
+            FileTool::put($fileName, $ymlData);
+            $this->info('yml 数据集合生成成功(覆盖)，表名为' . $this->oneHandel['tableName']);
+        }
 
     }
-
-
 }
