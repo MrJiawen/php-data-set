@@ -1,0 +1,26 @@
+{
+  "name": "mr-jiawen/php-data-set",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "chenjiawen",
+      "email": "604989282@qq.com"
+    }
+  ],
+  "require": {
+    "symfony/yaml": "^4.0",
+    "illuminate/support": "^5.5."
+  },
+  "autoload": {
+    "psr-4": {
+      "Jw\\DataSet\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Jw\\DataSet\\DataSetProvider"
+      ]
+    }
+  }
+}
