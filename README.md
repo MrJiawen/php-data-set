@@ -15,7 +15,7 @@
     php artisan yml:input  数据集的导入操作 （从数据库导入到yml文件）
     ```
     查看对应的参数：
-    ````php
+    ```php
     php artisan yml:input -h
     Description:
       数据集的导入操作 （从数据库导入到yml文件）
@@ -29,11 +29,11 @@
       -i, --id[=ID]                  操作相应的id，可以是字符串用逗号拼接(1,2,3,4,5,6)，可以是区间，使用 - 拼接(1-10)，注意如果你的id是 uuid 则不要使用 区间
       -p, --input_path[=INPUT_PATH]  输出的位置 [default: "database/data_set"]
       -a, --append                   生成的内容以追加的形式,存放到对应的输出文件
-   ```
+    ```
     
-   * 如果不给任何参数 将会自动 提醒输入 相应的 table 和 主键 值
-   * 默认的输出路径在 `database\data_set`
-   * 默认一个数据库是一个目录。不能跨库操作
+    * 如果不给任何参数 将会自动 提醒输入 相应的 table 和 主键 值
+    * 默认的输出路径在 `database\data_set`
+    * 默认一个数据库是一个目录。不能跨库操作
 
 2. 把yml文件到入到数据库
     ```php
