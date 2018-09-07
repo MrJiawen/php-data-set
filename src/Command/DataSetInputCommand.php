@@ -188,7 +188,11 @@ class DataSetInputCommand extends Command
                 $ymlData[$this->oneHandel['tableName']]
             );
             // 进行去重
-            $ymlData[$this->oneHandel['tableName']] = (new Collection($ymlData[$this->oneHandel['tableName']]))->unique('id')->toArray();
+            $ymlData[$this->oneHandel['tableName']] = (new Collection($ymlData[$this->oneHandel['tableName']]))
+                ->unique($this->oneHandel['primaryKey'])
+                ->sortBy($this->oneHandel['primaryKey'])
+                ->toArray();
+            $ymlData[$this->oneHandel['tableName']] = array_values($ymlData[$this->oneHandel['tableName']]);
 
             $ymlData = Yaml::dump($ymlData, 3, 2);
             FileTool::put($fileName, $ymlData);

@@ -4,6 +4,7 @@ namespace Jw\DataSet;
 
 use Illuminate\Support\ServiceProvider;
 use Jw\DataSet\Command\DataSetInputCommand;
+use Jw\DataSet\Command\DataSetOutputCommand;
 
 class DataSetProvider extends ServiceProvider
 {
@@ -16,7 +17,8 @@ class DataSetProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                DataSetInputCommand::class
+                DataSetInputCommand::class,
+                DataSetOutputCommand::class
             ]);
         }
     }
